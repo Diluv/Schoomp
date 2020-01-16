@@ -1,14 +1,13 @@
-package net.darkhax.schoomp.message;
+package com.diluv.schoomp.message;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.diluv.schoomp.message.embed.Embed;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
-import net.darkhax.schoomp.message.embed.Embed;
 
 /**
  * This class represents a message that can be sent to Discord using a Webhook. To use this

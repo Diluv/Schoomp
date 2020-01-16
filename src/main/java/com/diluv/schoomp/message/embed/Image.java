@@ -1,38 +1,38 @@
-package net.darkhax.schoomp.message.embed;
+package com.diluv.schoomp.message.embed;
 
 import javax.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 
 /**
- * This class represents the thumbnail element of an embedded Discord message.
+ * This class represents an image element in an embedded message.
  * 
  * @author Tyler Hancock (Darkhax)
  *
  */
-public class Thumbnail {
+public class Image {
     
     /**
-     * The url of the thumbnail image.
+     * A URL that points to the image to display.
      */
     @Expose
     @Nullable
     private String url;
     
-    public Thumbnail() {
+    public Image() {
         
         this(null);
     }
     
-    public Thumbnail(@Nullable String url) {
+    public Image(@Nullable String url) {
         
         this.url = url;
     }
     
     /**
-     * Gets the URL for the thumbnail.
+     * Gets the URL for the image.
      * 
-     * @return The URL for the thumbnail.
+     * @return The URL for the image.
      */
     @Nullable
     public String getUrl () {
@@ -41,12 +41,12 @@ public class Thumbnail {
     }
     
     /**
-     * Sets the URL for the thumbnail.
+     * Sets the URL for the image.
      * 
-     * @param url The URL for the thumbail.
+     * @param url The URL for the image.
      * @return The same instance.
      */
-    public Thumbnail setUrl (@Nullable String url) {
+    public Image setUrl (@Nullable String url) {
         
         this.url = url;
         return this;

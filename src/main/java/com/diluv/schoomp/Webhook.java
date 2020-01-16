@@ -1,4 +1,4 @@
-package net.darkhax.schoomp;
+package com.diluv.schoomp;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,10 +6,9 @@ import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import com.diluv.schoomp.message.Message;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import net.darkhax.schoomp.message.Message;
 
 /**
  * This class represents a Discord Webhook. Once an instance has been created using the

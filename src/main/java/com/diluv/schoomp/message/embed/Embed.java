@@ -1,4 +1,4 @@
-package net.darkhax.schoomp.message.embed;
+package com.diluv.schoomp.message.embed;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
