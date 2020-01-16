@@ -1,0 +1,104 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group = 'net.darkhax.schoomp'
+archivesBaseName = 'schoomp'
+version = '1.0.0'
+
+repositories {
+	
+	mavenCentral()
+}
+
+dependencies {
+
+	implementation 'com.github.spotbugs:spotbugs:4.0.0-beta5'
+    implementation 'com.google.code.gson:gson:2.8.6'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+
+    description = 'Creates a JAR containing the source code.'
+    from sourceSets.main.allSource
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+
+    description = 'Creates a JAR containing the JavaDocs.'
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+
+artifacts {
+
+    archives sourcesJar
+    archives javadocJar
+}
+
+signing {
+
+    sign configurations.archives
+}
+
+jar {
+    manifest {
+        attributes([
+            'Timestamp': System.currentTimeMillis(),
+            'Specification-Title': "Schoomp",
+            'Specification-Vendor': "Darkhax",
+            'Specification-Version': "${version}",
+            'Implementation-Title': project.archivesBaseName,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor' :"Darkhax",
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            'Built-On-Java': "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})"
+        ])
+    }
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+	  
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+	  
+        name 'Schoomp'
+        packaging 'jar'
+        description 'A small Java library for posting webhook messages.'
+        url 'https://github.com/Darkhax/Schoomp'
+		
+        scm {
+          connection 'scm:git:git://github.com/Darkhax/Schoomp.git'
+          developerConnection 'scm:git:ssh://github.com/Darkhax/Schoomp.git'
+          url 'https://github.com/Darkhax/Schoomp'
+        }
+
+        licenses {
+          license {
+            name 'GNU Lesser General Public License v2.1'
+            url 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html'
+          }
+        }
+
+        developers {
+          developer {
+            id 'Darkhax'
+            name 'Tyler Hancock'
+            email 'darkhax@darkhax.net'
+          }
+        }
+      }
+    }
+  }
+}
