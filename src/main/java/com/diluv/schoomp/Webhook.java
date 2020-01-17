@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 
+import javax.annotation.Nullable;
 import javax.net.ssl.HttpsURLConnection;
 
 import com.diluv.schoomp.message.Message;
@@ -55,27 +56,33 @@ public class Webhook {
      * and move on as normal if the message fails to send.
      * 
      * @param message The message to send.
+     * @return A response object containing all the information sent back from Discord.
      */
-    public void sendMessageUnsafely (Message message) {
+    @Nullable
+    public Response sendMessageUnsafely (Message message) {
         
         try {
             
-            this.sendMessage(message);
+            return this.sendMessage(message);
         }
         
         catch (final IOException e) {
             
             // Ignore the error and move on.
         }
+        
+        return null;
     }
     
     /**
      * Sends a message to Discord using your webhook.
      * 
      * @param message The message to send.
+     * @return A response object containing all the information sent back from Discord.
      * @throws IOException This will happen if the request can not be sent properly.
      */
-    public void sendMessage (Message message) throws IOException {
+    @Nullable
+    public Response sendMessage (Message message) throws IOException {
         
         // Encodes the message object as JSON.
         final String encoded = GSON.toJson(message);
@@ -101,7 +108,11 @@ public class Webhook {
         // us no response so we don't do anything here.
         connection.getInputStream().close();
         
+        final Response response = new Response(connection);
+        
         // Closes the connection.
         connection.disconnect();
+        
+        return response;
     }
 }
