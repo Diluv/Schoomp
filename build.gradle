@@ -1,11 +1,11 @@
 plugins {
     id 'java'
-    id 'maven'
     id 'signing'
     id 'io.codearte.nexus-staging' version '0.21.2'
+    id "de.marcphilipp.nexus-publish" version "0.4.0"
 }
 
-version = "${project_version}" + getBuildNumber() + (isSnapshot() ? "-snapshot" : '')
+version = "${project_version}" + (isSnapshot() ? '+' + getBuildNumber() : '')
 
 repositories {
     jcenter()
@@ -20,13 +20,13 @@ dependencies {
 task sourcesJar(type: Jar, dependsOn: classes) {
     description = 'Creates a JAR containing the source code.'
     from sourceSets.main.allSource
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
     description = 'Creates a JAR containing the JavaDocs.'
     from javadoc.destinationDir
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
 }
 
 artifacts {
@@ -52,58 +52,68 @@ jar {
 
 gradle.taskGraph.whenReady { taskGraph ->
     if (System.getenv("GPG_KEYNAME")) {
-        println "Configuring GPG KEY NAME"
         ext."signing.gnupg.keyName" = System.getenv("GPG_KEYNAME");
     }
 }
 
 signing {
     useGpgCmd()
-    sign configurations.archives
+    sign publishing.publications
 }
 
 tasks.withType(Sign) {
     onlyIf { !isSnapshot() }
 }
 
-uploadArchives {
+nexusStaging {
+    packageGroup = 'com.diluv'
+    numberOfRetries = 20
+    delayBetweenRetriesInMillis = 3000
+}
+
+nexusPublishing {
     repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+        sonatype {
+            username = System.getenv("OSSRH_USERNAME")
+            password = System.getenv("OSSRH_PASSWORD")
+        }
+    }
+}
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
-                authentication(userName: System.getenv("OSSRH_USERNAME"), password: System.getenv("OSSRH_PASSWORD"))
-            }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            group = project.group
+            artifactId = project.name
+            version = project.version
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: System.getenv("OSSRH_USERNAME"), password: System.getenv("OSSRH_PASSWORD"))
-            }
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
 
-            pom.project {
-
-                name 'Schoomp'
-                packaging 'jar'
-                description 'A small Java library for posting webhook messages.'
-                url 'https://github.com/Diluv/Schoomp'
+            pom {
+                name = project.name
+                description = project.description
+                url = 'https://github.com/Diluv/Schoomp'
 
                 scm {
-                    connection 'scm:git:git://github.com/Diluv/Schoomp.git'
-                    developerConnection 'scm:git:ssh://github.com/Diluv/Schoomp.git'
-                    url 'https://github.com/Diluv/Schoomp'
+                    connection = 'scm:git:git://github.com/Diluv/Schoomp.git'
+                    developerConnection = 'scm:git:ssh://github.com/Diluv/Schoomp.git'
+                    url = 'https://github.com/Diluv/Schoomp'
                 }
 
                 licenses {
                     license {
-                        name 'GNU Lesser General Public License v2.1'
-                        url 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html'
+                        name = 'GNU Lesser General Public License v2.1'
+                        url = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html'
                     }
                 }
 
                 developers {
                     developer {
-                        id 'lclc98'
-                        name 'lclc98'
-                        email 'lclc98@lclc98.com'
+                        id = 'lclc98'
+                        name = 'lclc98'
+                        email = 'lclc98@lclc98.com'
                     }
                 }
             }
@@ -112,7 +122,6 @@ uploadArchives {
 }
 
 nexusStaging {
-    stagingProfileId = '1282c5e0d73bd2'
     username = System.getenv("OSSRH_USERNAME")
     password = System.getenv("OSSRH_PASSWORD")
 }
