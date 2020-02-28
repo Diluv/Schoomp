@@ -5,7 +5,12 @@ Schoomp is a Java library for building and sending webhook requests to Discord. 
 The name Schoomp comes from a description of webhooks given by Discord in their [Intro To Webhooks](https://support.discordapp.com/hc/en-us/articles/228383668-Intro-to-Webhooks) blog post. The word Schoomp is an onomatopeia, meaning that it comes from the imitation of a sound. In this case the sound of a capsule traveling through a pneumatic tube.
 
 ## Maven Info
-Coming soon to a maven central near you! 🙃
+
+```
+dependencies {
+    implementation group: 'com.diluv.schoomp', name: 'Schoomp', version: 'PUT_VERSION_HERE'
+}
+```
 
 ## Getting Started
 
@@ -20,7 +25,7 @@ Webhook webhook = new Webhook("webhook url here", "user agent here");
 The next step is to create a new Message object which represents the contents and structure of the message you are sending. This is done by constructing the message object and customizing it with the various setter methods. You do not need to set every property however you do need to set the content or add at least one embed to the message. 
 
 ```java
-    Message message = new Message().setContent("Hello world!").setUsername("Example Application");
+Message message = new Message().setContent("Hello world!").setUsername("Example Application");
 ```
 
 The last step is to send the message to Discord. This is done by passing the message to the webhook. 
