@@ -226,7 +226,20 @@ public final class Embed {
      * 
      * @param name The name of the field.
      * @param value The value of the field.
-     * @param inline Whether or not the field should be inlined with other fields.
+     * @param inline Whether or not the field should be linline with other fields.
+     * @return The same embed object.
+     */
+    public Embed addField (String name, Number value, boolean inline) {
+        
+        return this.addField(name, value.toString(), inline);
+    }
+    
+    /**
+     * Adds a new field to the embed.
+     * 
+     * @param name The name of the field.
+     * @param value The value of the field.
+     * @param inline Whether or not the field should be inline with other fields.
      * @return The same embed object.
      */
     public Embed addField (String name, String value, boolean inline) {
