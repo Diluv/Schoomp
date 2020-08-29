@@ -3,6 +3,8 @@ package com.diluv.schoomp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.annotation.Nullable;
 import javax.net.ssl.HttpsURLConnection;
@@ -10,6 +12,8 @@ import javax.net.ssl.HttpsURLConnection;
 import com.diluv.schoomp.message.Message;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 
 /**
  * This class represents a Discord Webhook. Once an instance has been created using the
@@ -21,9 +25,14 @@ import com.google.gson.GsonBuilder;
 public class Webhook {
     
     /**
+     * Converts OffsetDateTime into a JSON string that Discord can use.
+     */
+    private static final JsonSerializer<OffsetDateTime> TIME_SERIALIZER = (s, t, c) -> new JsonPrimitive(s.format(DateTimeFormatter.ISO_INSTANT));
+    
+    /**
      * The internal Gson instance used to serialize webhook messages.
      */
-    private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm'Z'").create();
+    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(OffsetDateTime.class, TIME_SERIALIZER).create();
     
     /**
      * The webhook URL to send the message to. This should be considered a sensitive value as
