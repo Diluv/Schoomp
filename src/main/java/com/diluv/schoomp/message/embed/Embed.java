@@ -1,6 +1,11 @@
 package com.diluv.schoomp.message.embed;
 
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,7 +93,7 @@ public final class Embed {
      */
     @Expose
     @Nullable
-    private LocalDateTime timestamp;
+    private OffsetDateTime timestamp;
     
     /**
      * Gets the title of the embed.
@@ -221,7 +226,20 @@ public final class Embed {
      * 
      * @param name The name of the field.
      * @param value The value of the field.
-     * @param inline Whether or not the field should be inlined with other fields.
+     * @param inline Whether or not the field should be linline with other fields.
+     * @return The same embed object.
+     */
+    public Embed addField (String name, Number value, boolean inline) {
+        
+        return this.addField(name, value.toString(), inline);
+    }
+    
+    /**
+     * Adds a new field to the embed.
+     * 
+     * @param name The name of the field.
+     * @param value The value of the field.
+     * @param inline Whether or not the field should be inline with other fields.
      * @return The same embed object.
      */
     public Embed addField (String name, String value, boolean inline) {
@@ -343,7 +361,7 @@ public final class Embed {
      * @return The embed timestamp.
      */
     @Nullable
-    public LocalDateTime getTimestamp () {
+    public OffsetDateTime getTimestamp () {
         
         return this.timestamp;
     }
@@ -354,9 +372,88 @@ public final class Embed {
      * @param timestamp The embed timestamp.
      * @return The same embed object.
      */
-    public Embed setTimestamp (@Nullable LocalDateTime timestamp) {
+    public Embed setTimestamp (@Nullable TemporalAccessor timestamp) {
+        
+        return this.setTimestamp(getWithOffset(timestamp));
+    }
+    
+    /**
+     * Sets the embed timestamp to the current system time..
+     * 
+     * @return The same embed object.
+     */
+    public Embed setTimestamp () {
+        
+        return this.setTimestamp(OffsetDateTime.now());
+    }
+    
+    /**
+     * Sets the embed timestamp.
+     * 
+     * @param timestamp The embed timestamp.
+     * @return The same embed object.
+     */
+    public Embed setTimestamp (@Nullable OffsetDateTime timestamp) {
         
         this.timestamp = timestamp;
         return this;
+    }
+    
+    /**
+     * Converts several types of time objects into an OffsetDateTime. This allows serializing
+     * timezones to be a bit simpler. This code is adapted from JDA and is licensed under
+     * Apache 2.0. Only cosmetic/style changes were made.
+     * 
+     * https://github.com/DV8FromTheWorld/JDA/blob/3a9fcd0ecc88f988ac81eb2c18527283a83f12d1/src/main/java/net/dv8tion/jda/api/EmbedBuilder.java#L370-L425
+     * 
+     * @param timestamp The timestamp to covert.
+     * @return The converted timestamp.
+     */
+    private static OffsetDateTime getWithOffset (@Nullable TemporalAccessor timestamp) {
+        
+        if (timestamp == null) {
+            
+            return null;
+        }
+        
+        else if (timestamp instanceof OffsetDateTime) {
+            
+            return (OffsetDateTime) timestamp;
+        }
+        
+        else {
+            
+            ZoneOffset offset;
+            
+            try {
+                
+                offset = ZoneOffset.from(timestamp);
+            }
+            
+            catch (final DateTimeException e) {
+                
+                offset = ZoneOffset.UTC;
+            }
+            
+            try {
+                
+                final LocalDateTime ldt = LocalDateTime.from(timestamp);
+                return OffsetDateTime.of(ldt, offset);
+            }
+            
+            catch (final DateTimeException e1) {
+                
+                try {
+                    
+                    final Instant instant = Instant.from(timestamp);
+                    return OffsetDateTime.ofInstant(instant, offset);
+                }
+                
+                catch (final DateTimeException e2) {
+                    
+                    throw new DateTimeException("Unable to obtain OffsetDateTime from TemporalAccessor: " + timestamp + " of type " + timestamp.getClass().getName(), e2);
+                }
+            }
+        }
     }
 }
