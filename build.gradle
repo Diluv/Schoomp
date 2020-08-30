@@ -6,6 +6,10 @@ plugins {
 }
 
 version = "${project_version}" + (isSnapshot() ? '+' + getBuildNumber() : '')
+description = "Schoomp is a Java library for building and sending webhook requests to Discord"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     jcenter()
@@ -51,9 +55,7 @@ jar {
 }
 
 gradle.taskGraph.whenReady { taskGraph ->
-    if (System.getenv("GPG_KEYNAME")) {
-        ext."signing.gnupg.keyName" = System.getenv("GPG_KEYNAME");
-    }
+    ext."signing.gnupg.keyName" = "A35B3CEC"
 }
 
 signing {
@@ -67,8 +69,8 @@ tasks.withType(Sign) {
 
 nexusStaging {
     packageGroup = 'com.diluv'
-    numberOfRetries = 20
-    delayBetweenRetriesInMillis = 3000
+    numberOfRetries = 40
+    delayBetweenRetriesInMillis = 5000
 }
 
 nexusPublishing {
