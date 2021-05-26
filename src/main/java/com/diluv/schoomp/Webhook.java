@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 import javax.net.ssl.HttpsURLConnection;
@@ -25,6 +26,8 @@ import com.google.gson.JsonSerializer;
  * @author Tyler Hancock (Darkhax)
  */
 public class Webhook {
+    
+    private static final Logger LOGGER = Logger.getLogger("Schoomp");
     
     /**
      * Converts OffsetDateTime into a JSON string that Discord can use.
@@ -122,8 +125,8 @@ public class Webhook {
         final String encoded = GSON.toJson(message);
     
         if (debugMode) {
-            System.out.println("Encoded message:");
-            System.out.println(encoded);
+            LOGGER.info("Encoded message:");
+            LOGGER.info(encoded);
         }
         
         final URL url = new URL(this.webookUrl);
@@ -149,7 +152,7 @@ public class Webhook {
         
             try (BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             
-                responseReader.lines().forEach(System.out::println);
+                responseReader.lines().forEach(LOGGER::info);
             }
         } else {
         
