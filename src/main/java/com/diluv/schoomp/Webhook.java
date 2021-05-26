@@ -1,10 +1,13 @@
 package com.diluv.schoomp;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Logger;
 
 import javax.annotation.Nullable;
 import javax.net.ssl.HttpsURLConnection;
@@ -23,6 +26,8 @@ import com.google.gson.JsonSerializer;
  * @author Tyler Hancock (Darkhax)
  */
 public class Webhook {
+    
+    private static final Logger LOGGER = Logger.getLogger("Schoomp");
     
     /**
      * Converts OffsetDateTime into a JSON string that Discord can use.
@@ -47,6 +52,12 @@ public class Webhook {
     private final String userAgent;
     
     /**
+     * Should debug mode be enabled. Debug mode will print the json representation of the
+     * message before sending it and it will print any response that discord gives back.
+     */
+    private final boolean debugMode;
+    
+    /**
      * Creates an object that represents a Discord Webhook for a Discord channel. With this you
      * can send messages to your Discord channel using your application. This type is reusable,
      * so it is recommended that you keep a hard reference to your channels to save ram.
@@ -58,6 +69,23 @@ public class Webhook {
         
         this.webookUrl = webookUrl;
         this.userAgent = userAgent;
+        this.debugMode = false;
+    }
+    
+    /**
+     * Creates an object that represents a Discord Webhook for a Discord channel. With this you
+     * can send messages to your Discord channel using your application. This type is reusable,
+     * so it is recommended that you keep a hard reference to your channels to save ram.
+     *
+     * @param webookUrl The URL of your webhook.
+     * @param userAgent The user agent to use when sending your requests.
+     * @param debugMode Should debug mode be enabled.
+     */
+    public Webhook(String webookUrl, String userAgent, boolean debugMode) {
+        
+        this.webookUrl = webookUrl;
+        this.userAgent = userAgent;
+        this.debugMode = debugMode;
     }
     
     /**
@@ -95,6 +123,11 @@ public class Webhook {
         
         // Encodes the message object as JSON.
         final String encoded = GSON.toJson(message);
+    
+        if (debugMode) {
+            LOGGER.info("Encoded message:");
+            LOGGER.info(encoded);
+        }
         
         final URL url = new URL(this.webookUrl);
         final HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -112,10 +145,19 @@ public class Webhook {
             
             out.write(encoded.getBytes());
         }
+    
+        // Actually sends our request, and gets the response back. Discord usually
+        // gives no response back, but debugMode will print whatever they give back if they do.
+        if (debugMode){
         
-        // Actually sends our request, and gets the response back. In this case Discord gives
-        // us no response so we don't do anything here.
-        connection.getInputStream().close();
+            try (BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            
+                responseReader.lines().forEach(LOGGER::info);
+            }
+        } else {
+        
+            connection.getInputStream().close();
+        }
         
         final Response response = new Response(connection);
         
