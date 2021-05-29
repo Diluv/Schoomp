@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
@@ -143,14 +144,14 @@ public class Webhook {
         // Write the contents of the json to the output stream.
         try (OutputStream out = connection.getOutputStream()) {
             
-            out.write(encoded.getBytes());
+            out.write(encoded.getBytes(StandardCharsets.UTF_8));
         }
     
         // Actually sends our request, and gets the response back. Discord usually
         // gives no response back, but debugMode will print whatever they give back if they do.
-        if (debugMode){
+        if (debugMode) {
         
-            try (BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            try (BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
             
                 responseReader.lines().forEach(LOGGER::info);
             }
