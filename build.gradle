@@ -65,7 +65,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 signing {
     required { !isSnapshot() }
     useGpgCmd()
-    sign configurations.archives
+    sign(publishing.publications)
 }
 
 tasks.withType(io.github.gradlenexus.publishplugin.InitializeNexusStagingRepository).configureEach {
