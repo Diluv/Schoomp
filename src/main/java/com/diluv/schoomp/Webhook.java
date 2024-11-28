@@ -121,50 +121,58 @@ public class Webhook {
      */
     @Nullable
     public Response sendMessage (Message message) throws IOException {
-        
-        // Encodes the message object as JSON.
-        final String encoded = GSON.toJson(message);
-    
-        if (debugMode) {
-            LOGGER.info("Encoded message:");
-            LOGGER.info(encoded);
-        }
-        
-        final URL url = new URL(this.webookUrl);
-        final HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        
-        // Set up the request to send the message data.
-        connection.addRequestProperty("Content-Type", "application/json; charset=UTF-8");
-        connection.addRequestProperty("User-Agent", this.userAgent);
-        connection.setDoOutput(true);
-        connection.setRequestMethod("POST");
-        
-        connection.connect();
-        
-        // Write the contents of the json to the output stream.
-        try (OutputStream out = connection.getOutputStream()) {
-            
-            out.write(encoded.getBytes(StandardCharsets.UTF_8));
-        }
-    
-        // Actually sends our request, and gets the response back. Discord usually
-        // gives no response back, but debugMode will print whatever they give back if they do.
-        if (debugMode) {
-        
-            try (BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-            
-                responseReader.lines().forEach(LOGGER::info);
+
+        try {
+            // Encodes the message object as JSON.
+            final String encoded = GSON.toJson(message);
+
+            if (debugMode) {
+                LOGGER.info("Encoded message:");
+                LOGGER.info(encoded);
             }
-        } else {
-        
-            connection.getInputStream().close();
+
+            final URL url = new URL(this.webookUrl);
+            final HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+            // Set up the request to send the message data.
+            connection.addRequestProperty("Content-Type", "application/json; charset=UTF-8");
+            connection.addRequestProperty("User-Agent", this.userAgent);
+            connection.setDoOutput(true);
+            connection.setRequestMethod("POST");
+
+            connection.connect();
+
+            // Write the contents of the json to the output stream.
+            try (OutputStream out = connection.getOutputStream()) {
+
+                out.write(encoded.getBytes(StandardCharsets.UTF_8));
+            }
+
+            // Actually sends our request, and gets the response back. Discord usually
+            // gives no response back, but debugMode will print whatever they give back if they do.
+            if (debugMode) {
+
+                try (BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+
+                    responseReader.lines().forEach(LOGGER::info);
+                }
+            } else {
+
+                connection.getInputStream().close();
+            }
+
+            final Response response = new Response(connection);
+
+            // Closes the connection.
+            connection.disconnect();
+
+            return response;
         }
-        
-        final Response response = new Response(connection);
-        
-        // Closes the connection.
-        connection.disconnect();
-        
-        return response;
+
+        catch (IOException e) {
+            LOGGER.severe("The webhook could not be sent. Error: " + e.getMessage().replace(this.webookUrl, "<webhook_url>"));
+        }
+
+        return null;
     }
 }
